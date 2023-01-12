@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    CountriesListScreen(CountriesListUIState.Loading)
                 }
             }
         }
@@ -30,14 +30,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun CountriesListScreen(state: CountriesListUIState) {
+    Text(text = "Hello World!")
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     MyCountriesTheme {
-        Greeting("Android")
+        CountriesListScreen(CountriesListUIState.Loading)
     }
 }

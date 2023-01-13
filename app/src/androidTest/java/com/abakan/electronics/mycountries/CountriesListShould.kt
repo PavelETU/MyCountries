@@ -30,13 +30,15 @@ class CountriesListShould {
 
     @Test
     fun displayOneCountry_givenOneCountryIsLoaded() {
+        val name = "Spain"
+        val capital = "Madrid"
         composeTestRule.setContent {
             CountriesListScreen(
                 state = CountriesListUIState.Success(
                     listOf(
                         Country(
-                            Name("Spain"),
-                            Capital("Madrid"),
+                            Name(name),
+                            Capital(capital),
                             CoatOfArmsImage("https://mainfacts.com/media/images/coats_of_arms/es.png")
                         )
                     )
@@ -47,14 +49,14 @@ class CountriesListShould {
         composeTestRule.onNodeWithText(
             composeTestRule.activity.resources.getString(
                 R.string.country,
-                "Spain"
+                name
             )
         ).assertIsDisplayed()
         composeTestRule
             .onNodeWithText(
                 composeTestRule.activity.resources.getString(
                     R.string.capital,
-                    "Madrid"
+                    capital
                 )
             )
             .assertIsDisplayed()
@@ -62,7 +64,7 @@ class CountriesListShould {
             .onNodeWithContentDescription(
                 composeTestRule.activity.resources.getString(
                     R.string.coat_of_arms_description,
-                    "Spain"
+                    name
                 )
             )
             .assertIsDisplayed()

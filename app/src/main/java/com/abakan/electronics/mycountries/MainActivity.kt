@@ -8,7 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,38 +39,7 @@ class MainActivity : ComponentActivity() {
 fun CountriesListScreen(state: CountriesListUIState) {
     when (state) {
         is CountriesListUIState.Loading -> LoadingState()
-        is CountriesListUIState.Success -> ElevatedCard(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp)
-        ) {
-            val country = state.countries[0]
-            AsyncImage(
-                model = country.coatOfArmsImage.url,
-                contentDescription = stringResource(
-                    id = R.string.coat_of_arms_description,
-                    country.name.name
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .padding(top = 5.dp)
-            )
-            Text(
-                text = stringResource(id = R.string.country, country.name.name),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(5.dp),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = stringResource(id = R.string.capital, country.capital.capital),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(5.dp),
-                textAlign = TextAlign.Center
-            )
-        }
+        is CountriesListUIState.Success -> CountryItem(state)
     }
 }
 
@@ -83,7 +54,51 @@ private fun LoadingState() {
     }
 }
 
-@Preview(showBackground = true)
+@Composable
+private fun CountryItem(state: CountriesListUIState.Success) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+    ) {
+        val country = state.countries[0]
+        AsyncImage(
+            model = country.coatOfArmsImage.url,
+            contentDescription = stringResource(
+                id = R.string.coat_of_arms_description,
+                country.name.name
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(top = 5.dp),
+            placeholder = returnDummyPainterForPreviewOrNull()
+        )
+        Text(
+            text = stringResource(id = R.string.country, country.name.name),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(5.dp),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(id = R.string.capital, country.capital.capital),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(5.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun returnDummyPainterForPreviewOrNull() =
+    if (LocalInspectionMode.current)
+        painterResource(id = R.drawable.ic_launcher_foreground)
+    else
+        null
+
+@Preview(showBackground = true, heightDp = 100)
 @Composable
 fun LoadingPreview() {
     MyCountriesTheme {
@@ -91,7 +106,7 @@ fun LoadingPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(heightDp = 400, showBackground = true)
 @Composable
 fun OneCountryPreview() {
     MyCountriesTheme {

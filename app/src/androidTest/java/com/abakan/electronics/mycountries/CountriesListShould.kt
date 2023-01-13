@@ -16,6 +16,23 @@ import org.junit.runner.RunWith
 class CountriesListShould {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    private val listOfCountries = listOf(
+        Country(
+            Name("Spain"),
+            Capital("Madrid"),
+            CoatOfArmsImage("")
+        ),
+        Country(
+            Name("Georgia"),
+            Capital("Tbilisi"),
+            CoatOfArmsImage("")
+        ),
+        Country(
+            Name("Norway"),
+            Capital("Oslo"),
+            CoatOfArmsImage("")
+        )
+    )
 
     @Test
     fun displayLoadingIndicator_givenStateIsLoading() {
@@ -39,7 +56,7 @@ class CountriesListShould {
                         Country(
                             Name(name),
                             Capital(capital),
-                            CoatOfArmsImage("https://mainfacts.com/media/images/coats_of_arms/es.png")
+                            CoatOfArmsImage("")
                         )
                     )
                 )
@@ -68,5 +85,23 @@ class CountriesListShould {
                 )
             )
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun displayThreeCountries_givenThreeCountriesLoaded() {
+        composeTestRule.setContent {
+            CountriesListScreen(state = CountriesListUIState.Success(listOfCountries))
+        }
+
+        listOfCountries.forEach {
+            composeTestRule.onNodeWithText(it.name.name).assertExists()
+            composeTestRule.onNodeWithText(it.capital.capital).assertExists()
+            composeTestRule.onNodeWithContentDescription(
+                composeTestRule.activity.resources.getString(
+                    R.string.coat_of_arms_description,
+                    it.name.name
+                )
+            ).assertExists()
+        }
     }
 }

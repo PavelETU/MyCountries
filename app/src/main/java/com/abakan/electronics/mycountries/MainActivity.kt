@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,7 +41,7 @@ class MainActivity : ComponentActivity() {
 fun CountriesListScreen(state: CountriesListUIState) {
     when (state) {
         is CountriesListUIState.Loading -> LoadingState()
-        is CountriesListUIState.Success -> CountryItem(state)
+        is CountriesListUIState.Success -> CountryList(state)
     }
 }
 
@@ -55,18 +57,26 @@ private fun LoadingState() {
 }
 
 @Composable
-private fun CountryItem(state: CountriesListUIState.Success) {
+private fun CountryList(state: CountriesListUIState.Success) {
+    LazyColumn {
+        items(state.countries) { country ->
+            country.ToComposable()
+        }
+    }
+}
+
+@Composable
+private fun Country.ToComposable() {
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
     ) {
-        val country = state.countries[0]
         AsyncImage(
-            model = country.coatOfArmsImage.url,
+            model = coatOfArmsImage.url,
             contentDescription = stringResource(
                 id = R.string.coat_of_arms_description,
-                country.name.name
+                name.name
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,14 +85,14 @@ private fun CountryItem(state: CountriesListUIState.Success) {
             placeholder = returnDummyPainterForPreviewOrNull()
         )
         Text(
-            text = stringResource(id = R.string.country, country.name.name),
+            text = stringResource(id = R.string.country, name.name),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(5.dp),
             textAlign = TextAlign.Center
         )
         Text(
-            text = stringResource(id = R.string.capital, country.capital.capital),
+            text = stringResource(id = R.string.capital, capital.capital),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(5.dp),
@@ -117,6 +127,34 @@ fun OneCountryPreview() {
                         Name("Spain"),
                         Capital("Madrid"),
                         CoatOfArmsImage("https://mainfacts.com/media/images/coats_of_arms/es.png")
+                    )
+                )
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThreeCountriesPreview() {
+    MyCountriesTheme {
+        CountriesListScreen(
+            CountriesListUIState.Success(
+                listOf(
+                    Country(
+                        Name("Spain"),
+                        Capital("Madrid"),
+                        CoatOfArmsImage("https://mainfacts.com/media/images/coats_of_arms/es.png")
+                    ),
+                    Country(
+                        Name("Georgia"),
+                        Capital("Tbilisi"),
+                        CoatOfArmsImage("https://mainfacts.com/media/images/coats_of_arms/ge.png")
+                    ),
+                    Country(
+                        Name("Norway"),
+                        Capital("Oslo"),
+                        CoatOfArmsImage("https://mainfacts.com/media/images/coats_of_arms/no.png")
                     )
                 )
             )

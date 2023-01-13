@@ -94,8 +94,18 @@ class CountriesListShould {
         }
 
         listOfCountries.forEach {
-            composeTestRule.onNodeWithText(it.name.name).assertExists()
-            composeTestRule.onNodeWithText(it.capital.capital).assertExists()
+            composeTestRule.onNodeWithText(
+                composeTestRule.activity.resources.getString(
+                    R.string.country,
+                    it.name.name
+                )
+            ).assertExists()
+            composeTestRule.onNodeWithText(
+                composeTestRule.activity.resources.getString(
+                    R.string.capital,
+                    it.capital.capital
+                )
+            ).assertExists()
             composeTestRule.onNodeWithContentDescription(
                 composeTestRule.activity.resources.getString(
                     R.string.coat_of_arms_description,

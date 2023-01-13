@@ -54,6 +54,8 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.preview)
     implementation(libs.androidx.compose.material)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.compose.ui.test)

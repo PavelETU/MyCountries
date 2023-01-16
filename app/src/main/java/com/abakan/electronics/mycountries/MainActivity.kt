@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -28,6 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             MyCountriesTheme {
                 // A surface container using the 'background' color from the theme
@@ -65,7 +67,7 @@ private fun LoadingState() {
 
 @Composable
 private fun CountryList(state: CountriesListUIState.Success) {
-    LazyColumn {
+    LazyColumn(contentPadding = WindowInsets.systemBars.asPaddingValues()) {
         items(state.countries) { country ->
             country.ToComposable()
         }

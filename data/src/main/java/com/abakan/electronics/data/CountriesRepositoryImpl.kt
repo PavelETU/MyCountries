@@ -1,37 +1,16 @@
 package com.abakan.electronics.data
 
+import com.abakan.electronics.data.db.CountriesDao
+import com.abakan.electronics.data.db.CountryEntity
+import com.abakan.electronics.data.db.asExternal
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-interface CountriesRepository {
-    fun getCountries(): Flow<List<Country>>
-}
-
-class CountriesRepositoryImpl @Inject constructor() : CountriesRepository {
+internal class CountriesRepositoryImpl @Inject constructor(private val countriesDao: CountriesDao) :
+    CountriesRepository {
     override fun getCountries(): Flow<List<Country>> =
-        // return dummy data for now
-        flow {
-            emit(
-                listOf(
-                    Country(
-                        "Spain",
-                        "Madrid",
-                        "https://mainfacts.com/media/images/coats_of_arms/es.png"
-                    ),
-                    Country(
-                        "UK",
-                        "London",
-                        "https://mainfacts.com/media/images/coats_of_arms/gb.png"
-                    ),
-                    Country(
-                        "US",
-                        "Washington D.C.",
-                        "https://mainfacts.com/media/images/coats_of_arms/us.png"
-                    )
-                )
-            )
-        }
+        countriesDao
+            .getCountries()
+            .map { it.map(CountryEntity::asExternal) }
 }
-
-data class Country(val name: String, val capital: String, val coatOfArmsUrl: String)

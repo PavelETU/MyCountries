@@ -14,6 +14,9 @@ coil = "2.2.2"
 mockk = "1.13.3"
 hilt = "2.44.2"
 coroutines = "1.6.4"
+ksp = "1.7.20-1.0.8"
+room = "2.5.0"
+junitRunner = "1.5.2"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -36,6 +39,10 @@ dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref =
 dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+junit-runner = { module = "androidx.test:runner", version.ref = "junitRunner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidPlugin" }
@@ -43,3 +50,4 @@ android-library = { id = "com.android.library", version.ref = "androidPlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinPlugin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinPlugin" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -9,10 +9,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.engine.*
+import io.ktor.client.engine.android.*
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal class DBProviders {
+internal class Providers {
     @Provides
     fun provideDao(countriesDatabase: CountriesDatabase): CountriesDao =
         countriesDatabase.countriesDao()
@@ -23,4 +25,7 @@ internal class DBProviders {
             .databaseBuilder(appContext, CountriesDatabase::class.java, "Countries.db")
             .createFromAsset("Countries.db")
             .build()
+
+    @Provides
+    fun provideAndroidEngine(): HttpClientEngine = AndroidClientEngine(AndroidEngineConfig())
 }

@@ -17,6 +17,7 @@ coroutines = "1.6.4"
 ksp = "1.7.20-1.0.8"
 room = "2.5.0"
 junitRunner = "1.5.2"
+ktor = "2.2.2"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,10 @@ room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 junit-runner = { module = "androidx.test:runner", version.ref = "junitRunner" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidPlugin" }
@@ -51,3 +56,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinPlu
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinPlugin" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinPlugin" }

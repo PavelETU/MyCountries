@@ -7,7 +7,7 @@ import com.abakan.electronics.data.Country
 
 @Entity(tableName = "countries")
 internal data class CountryEntity(
-    @PrimaryKey(autoGenerate = true) var uid: Int = 0,
+    @PrimaryKey(autoGenerate = false) val uid: Int,
     val name: String,
     val capital: String,
     @ColumnInfo(name = "coat_of_arms_url") val coatOfArmsUrl: String

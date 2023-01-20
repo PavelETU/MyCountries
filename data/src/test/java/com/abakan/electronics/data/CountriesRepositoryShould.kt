@@ -2,16 +2,14 @@ package com.abakan.electronics.data
 
 import com.abakan.electronics.data.db.CountriesDao
 import com.abakan.electronics.data.db.CountryEntity
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import com.abakan.electronics.data.remote.*
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -20,6 +18,10 @@ import org.junit.Test
 class CountriesRepositoryShould {
     @RelaxedMockK
     private lateinit var countriesDao: CountriesDao
+
+    @RelaxedMockK
+    private lateinit var countriesRemoteDataSource: CountriesRemoteDataSource
+
     @InjectMockKs
     private lateinit var repository: CountriesRepositoryImpl
 
@@ -39,5 +41,51 @@ class CountriesRepositoryShould {
         assertEquals("Spain", countries[0].name)
         assertEquals("Madrid", countries[0].capital)
         assertEquals("www.coatOfArms.com", countries[0].coatOfArmsUrl)
+    }
+
+    @Test
+    fun `sync database with the network`() = runTest {
+        val countries = listOf(
+            RemoteCountry(
+                Name("Spain"),
+                listOf("Madrid"),
+                CoatOfArmsResponse(png = "https://mainfacts.com/media/images/coats_of_arms/es.png")
+            ),
+            RemoteCountry(
+                Name("UK"),
+                listOf("London"),
+                CoatOfArmsResponse("https://mainfacts.com/media/images/coats_of_arms/gb.png")
+            ),
+            RemoteCountry(
+                Name("US"),
+                listOf("Washington D.C."),
+                CoatOfArmsResponse("https://mainfacts.com/media/images/coats_of_arms/us.png")
+            )
+        )
+        coEvery { countriesRemoteDataSource.getCountries() } returns countries
+        repository.sync()
+        coVerify(exactly = 1) { countriesRemoteDataSource.getCountries() }
+        coVerify(exactly = 1) {
+            countriesDao.insertAll(
+                CountryEntity(
+                    0,
+                    "Spain",
+                    "Madrid",
+                    "https://mainfacts.com/media/images/coats_of_arms/es.png"
+                ),
+                CountryEntity(
+                    1,
+                    "UK",
+                    "London",
+                    "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+                ),
+                CountryEntity(
+                    2,
+                    "US",
+                    "Washington D.C.",
+                    "https://mainfacts.com/media/images/coats_of_arms/us.png"
+                )
+            )
+        }
     }
 }

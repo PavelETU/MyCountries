@@ -44,14 +44,18 @@ class CountriesDBShould {
     @Test
     fun replaceOldCountriesWhileUpdate() = runTest {
         countriesDao.insertAll(
-            CountryEntity(0, "OldCountry", "OldCapital", "OldCoatOfArms"),
-            CountryEntity(1, "OldCountry2", "OldCapital2", "OldCoatOfArms2"),
-            CountryEntity(2, "OldCountry3", "OldCapital3", "OldCoatOfArms3")
+            listOf(
+                CountryEntity(0, "OldCountry", "OldCapital", "OldCoatOfArms"),
+                CountryEntity(1, "OldCountry2", "OldCapital2", "OldCoatOfArms2"),
+                CountryEntity(2, "OldCountry3", "OldCapital3", "OldCoatOfArms3")
+            )
         )
         countriesDao.insertAll(
-            CountryEntity(0, "NewCountry", "NewCapital", "NewCoatOfArms"),
-            CountryEntity(1, "NewCountry2", "NewCapital2", "NewCoatOfArms2"),
-            CountryEntity(2, "NewCountry3", "NewCapital3", "NewCoatOfArms3")
+            listOf(
+                CountryEntity(0, "NewCountry", "NewCapital", "NewCoatOfArms"),
+                CountryEntity(1, "NewCountry2", "NewCapital2", "NewCoatOfArms2"),
+                CountryEntity(2, "NewCountry3", "NewCapital3", "NewCoatOfArms3")
+            )
         )
         val countries = countriesDao.getCountries().first()
 

@@ -67,23 +67,25 @@ class CountriesRepositoryShould {
         coVerify(exactly = 1) { countriesRemoteDataSource.getCountries() }
         coVerify(exactly = 1) {
             countriesDao.insertAll(
-                CountryEntity(
-                    0,
-                    "Spain",
-                    "Madrid",
-                    "https://mainfacts.com/media/images/coats_of_arms/es.png"
-                ),
-                CountryEntity(
-                    1,
-                    "UK",
-                    "London",
-                    "https://mainfacts.com/media/images/coats_of_arms/gb.png"
-                ),
-                CountryEntity(
-                    2,
-                    "US",
-                    "Washington D.C.",
-                    "https://mainfacts.com/media/images/coats_of_arms/us.png"
+                listOf(
+                    CountryEntity(
+                        0,
+                        "Spain",
+                        "Madrid",
+                        "https://mainfacts.com/media/images/coats_of_arms/es.png"
+                    ),
+                    CountryEntity(
+                        1,
+                        "UK",
+                        "London",
+                        "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+                    ),
+                    CountryEntity(
+                        2,
+                        "US",
+                        "Washington D.C.",
+                        "https://mainfacts.com/media/images/coats_of_arms/us.png"
+                    )
                 )
             )
         }

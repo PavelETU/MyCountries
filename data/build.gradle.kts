@@ -39,6 +39,9 @@ android {
 dependencies {
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.android.compiler)
+    implementation(libs.hilt.`for`.work.manager)
+    kapt(libs.hilt.`for`.work.manager.compiler)
+    annotationProcessor(libs.hilt.`for`.work.manager.compiler)
     implementation(libs.coroutines)
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
@@ -47,6 +50,8 @@ dependencies {
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.serialization)
+    implementation(libs.work.manager)
+    implementation(libs.androidx.startup)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

@@ -20,10 +20,10 @@ internal class CountriesRepositoryImpl @Inject constructor(
 
     override suspend fun sync() {
         val remoteCountries = remoteSource.getCountries()
-        countriesDao.insertAll(*remoteCountries.mapIndexed { index, remoteCountry ->
+        countriesDao.insertAll(remoteCountries.mapIndexed { index, remoteCountry ->
             remoteCountry.toEntity(
                 index
             )
-        }.toTypedArray())
+        })
     }
 }

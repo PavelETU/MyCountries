@@ -11,5 +11,5 @@ internal interface CountriesDao {
     @Query("SELECT * FROM countries")
     fun getCountries(): Flow<List<CountryEntity>>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vararg countries: CountryEntity)
+    suspend fun insertAll(countries: List<CountryEntity>)
 }

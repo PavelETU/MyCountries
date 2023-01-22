@@ -19,4 +19,4 @@ Uses:
 - Unit tests with Mockk
 
 The app is written using TDD with the help of unit tests and UI tests.<br><br>
-The app is designed as an offline first app and uses fallback data if the first network call failed
+The app is designed as an offline first app and uses fallback data if the first network call fails

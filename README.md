@@ -11,9 +11,12 @@ Uses:
 - Ktor for network calls
 - Jetpack Compose
 - Compose UI test
-- Unidirectional flow is provided by using Room DB and WorkManager
+- Unidirectional flow
+- Room DB
+- WorkManager
 - App Startup
 - Hilt
 - Unit tests with Mockk
 
-The app is written using TDD approach using unit tests and UI tests
+The app is written using TDD with the help of unit tests and UI tests.<br><br>
+The app is designed as an offline first app and uses fallback data if the first network call failed

@@ -13,22 +13,17 @@ import kotlinx.coroutines.withContext
 class InjectedWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workParams: WorkerParameters,
-    private val repository: CountriesRepository
+    repository: CountriesRepository
 ) : CoroutineWorker(appContext, workParams) {
+
+    private val workDelegate = WorkDelegate(repository)
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        try {
-            repository.sync()
-            Result.success()
-        } catch (t: Throwable) {
-            Result.retry()
-        }
+        workDelegate.doWork()
     }
 
     companion object {
         fun buildWorkRequest() = OneTimeWorkRequestBuilder<DefaultWorker>()
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setConstraints(
-                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-            ).setInputData(InjectedWorker::class.workerData()).build()
+            .setInputData(InjectedWorker::class.workerData()).build()
     }
 }

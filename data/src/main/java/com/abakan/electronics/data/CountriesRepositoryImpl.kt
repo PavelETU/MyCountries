@@ -26,4 +26,8 @@ internal class CountriesRepositoryImpl @Inject constructor(
             )
         })
     }
+
+    override suspend fun insertFallbackData() {
+        countriesDao.insertAll(FALLBACK_DATA)
+    }
 }

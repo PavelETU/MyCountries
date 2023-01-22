@@ -90,4 +90,12 @@ class CountriesRepositoryShould {
             )
         }
     }
+
+    @Test
+    fun `insert 3 countries into db on insertFallbackData`() = runTest {
+        repository.insertFallbackData()
+        coVerify(exactly = 1) {
+            countriesDao.insertAll(FALLBACK_DATA)
+        }
+    }
 }

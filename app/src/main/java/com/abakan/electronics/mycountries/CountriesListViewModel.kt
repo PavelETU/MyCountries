@@ -24,7 +24,11 @@ class CountriesListViewModel @Inject constructor(repository: CountriesRepository
             )
 
     private fun List<DataCountry>.toUIState(): CountriesListUIState =
-        CountriesListUIState.Success(map {
-            Country(Name(it.name), Capital(it.capital), CoatOfArmsImage(it.coatOfArmsUrl))
-        })
+        if (isNotEmpty()) {
+            CountriesListUIState.Success(map {
+                Country(Name(it.name), Capital(it.capital), CoatOfArmsImage(it.coatOfArmsUrl))
+            })
+        } else {
+            CountriesListUIState.Loading
+        }
 }

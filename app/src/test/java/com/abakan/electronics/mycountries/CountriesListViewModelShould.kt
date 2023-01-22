@@ -66,4 +66,15 @@ class CountriesListViewModelShould {
         }
         collectJob.cancel()
     }
+
+    @Test
+    fun `map empty list to loading state`() = runTest {
+        every { repository.getCountries() } returns flow { emit(emptyList()) }
+
+        val viewModel = CountriesListViewModel(repository)
+        val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+
+        assertTrue(viewModel.uiState.value is CountriesListUIState.Loading)
+        collectJob.cancel()
+    }
 }

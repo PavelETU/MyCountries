@@ -25,7 +25,6 @@ internal object Providers {
     fun provideDB(@ApplicationContext appContext: Context): CountriesDatabase =
         Room
             .databaseBuilder(appContext, CountriesDatabase::class.java, "Countries.db")
-            .createFromAsset("Countries.db")
             .build()
 
     @Provides

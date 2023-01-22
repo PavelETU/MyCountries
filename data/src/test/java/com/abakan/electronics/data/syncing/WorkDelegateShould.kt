@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -24,7 +25,8 @@ class WorkDelegateShould {
     fun setUp() = MockKAnnotations.init(this)
 
     @Test
-    fun `return success given sync completed`() = runTest {
+    fun `return success given sync returned true`() = runTest {
+        coEvery { repository.sync() } returns true
         val result = worker.doWork()
 
         coVerify(exactly = 1) { repository.sync() }
@@ -32,20 +34,11 @@ class WorkDelegateShould {
     }
 
     @Test
-    fun `return retry given sync threw an exception`() = runTest {
-        coEvery { repository.sync() } throws RuntimeException()
+    fun `return retry given sync returned false`() = runTest {
+        coEvery { repository.sync() } returns false
 
         val result = worker.doWork()
 
         assertEquals(ListenableWorker.Result.retry(), result)
-    }
-
-    @Test
-    fun `insert fallback data given sync failed`() = runTest {
-        coEvery { repository.sync() } throws RuntimeException()
-
-        worker.doWork()
-
-        coVerify(exactly = 1) { repository.insertFallbackData() }
     }
 }

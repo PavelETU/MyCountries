@@ -10,10 +10,47 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+private val COUNTRIES = listOf(
+    RemoteCountry(
+        Name("Spain"),
+        listOf("Madrid"),
+        CoatOfArmsResponse(png = "https://mainfacts.com/media/images/coats_of_arms/es.png")
+    ),
+    RemoteCountry(
+        Name("UK"),
+        listOf("London"),
+        CoatOfArmsResponse("https://mainfacts.com/media/images/coats_of_arms/gb.png")
+    ),
+    RemoteCountry(
+        Name("US"),
+        listOf("Washington D.C."),
+        CoatOfArmsResponse("https://mainfacts.com/media/images/coats_of_arms/us.png")
+    )
+)
+private val COUNTRIES_ENTITIES = listOf(
+    CountryEntity(
+        0,
+        "Spain",
+        "Madrid",
+        "https://mainfacts.com/media/images/coats_of_arms/es.png"
+    ),
+    CountryEntity(
+        1,
+        "UK",
+        "London",
+        "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+    ),
+    CountryEntity(
+        2,
+        "US",
+        "Washington D.C.",
+        "https://mainfacts.com/media/images/coats_of_arms/us.png"
+    )
+)
 @OptIn(ExperimentalCoroutinesApi::class)
 class CountriesRepositoryShould {
     @RelaxedMockK
@@ -44,58 +81,50 @@ class CountriesRepositoryShould {
     }
 
     @Test
-    fun `sync database with the network`() = runTest {
-        val countries = listOf(
-            RemoteCountry(
-                Name("Spain"),
-                listOf("Madrid"),
-                CoatOfArmsResponse(png = "https://mainfacts.com/media/images/coats_of_arms/es.png")
-            ),
-            RemoteCountry(
-                Name("UK"),
-                listOf("London"),
-                CoatOfArmsResponse("https://mainfacts.com/media/images/coats_of_arms/gb.png")
-            ),
-            RemoteCountry(
-                Name("US"),
-                listOf("Washington D.C."),
-                CoatOfArmsResponse("https://mainfacts.com/media/images/coats_of_arms/us.png")
-            )
-        )
-        coEvery { countriesRemoteDataSource.getCountries() } returns countries
-        repository.sync()
-        coVerify(exactly = 1) { countriesRemoteDataSource.getCountries() }
-        coVerify(exactly = 1) {
-            countriesDao.insertAll(
-                listOf(
-                    CountryEntity(
-                        0,
-                        "Spain",
-                        "Madrid",
-                        "https://mainfacts.com/media/images/coats_of_arms/es.png"
-                    ),
-                    CountryEntity(
-                        1,
-                        "UK",
-                        "London",
-                        "https://mainfacts.com/media/images/coats_of_arms/gb.png"
-                    ),
-                    CountryEntity(
-                        2,
-                        "US",
-                        "Washington D.C.",
-                        "https://mainfacts.com/media/images/coats_of_arms/us.png"
-                    )
+    fun `sync DB with network and return true if sync successful`() {
+        runTest {
+            coEvery { countriesRemoteDataSource.getCountries() } returns COUNTRIES
+            val dataSynced = repository.sync()
+            coVerify(exactly = 1) { countriesRemoteDataSource.getCountries() }
+            coVerify(exactly = 1) {
+                countriesDao.insertAll(
+                    COUNTRIES_ENTITIES
                 )
-            )
+            }
+            assertTrue(dataSynced)
         }
     }
 
     @Test
-    fun `insert 3 countries into db on insertFallbackData`() = runTest {
-        repository.insertFallbackData()
+    fun `insert fallback countries into empty db and return false for sync given network call failed`() = runTest {
+        coEvery { countriesRemoteDataSource.getCountries() } throws RuntimeException()
+        coEvery { countriesDao.getCount() } returns 0
+        val result = repository.sync()
         coVerify(exactly = 1) {
             countriesDao.insertAll(FALLBACK_DATA)
         }
+        assertFalse(result)
+    }
+
+    @Test
+    fun `don't insert anything into DB and return false during sync given DB has entries and network call failed`() = runTest {
+        coEvery { countriesRemoteDataSource.getCountries() } throws RuntimeException()
+        coEvery { countriesDao.getCount() } returns 3
+        val result = repository.sync()
+        coVerify(exactly = 0) {
+            countriesDao.insertAll(any())
+        }
+        assertFalse(result)
+    }
+
+    @Test
+    fun `update not empty DB from network and return true during sync`() = runTest {
+        coEvery { countriesRemoteDataSource.getCountries() } returns COUNTRIES
+        coEvery { countriesDao.getCount() } returns 3
+        val result = repository.sync()
+        coVerify(exactly = 1) {
+            countriesDao.insertAll(COUNTRIES_ENTITIES)
+        }
+        assertTrue(result)
     }
 }

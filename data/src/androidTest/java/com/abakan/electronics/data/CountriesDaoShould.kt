@@ -17,7 +17,7 @@ import org.junit.Test
 import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CountriesDBShould {
+class CountriesDaoShould {
     private lateinit var countriesDao: CountriesDao
     private lateinit var db: CountriesDatabase
 
@@ -42,7 +42,7 @@ class CountriesDBShould {
     }
 
     @Test
-    fun replaceOldCountriesWhileUpdate() = runTest {
+    fun replaceOldCountriesOnUpdate() = runTest {
         countriesDao.insertAll(
             listOf(
                 CountryEntity(0, "OldCountry", "OldCapital", "OldCoatOfArms"),
@@ -70,5 +70,24 @@ class CountriesDBShould {
         assertEquals("NewCountry3", countries[2].name)
         assertEquals("NewCapital3", countries[2].capital)
         assertEquals("NewCoatOfArms3", countries[2].coatOfArmsUrl)
+    }
+
+    @Test
+    fun return0AsNumberOfCountries_givenDBIsEmpty() = runTest {
+        assertEquals(0, countriesDao.getCount())
+    }
+
+    @Test
+    fun return5AsNumberOfCountries_given5EntriesInserted() = runTest {
+        countriesDao.insertAll(
+            listOf(
+                CountryEntity(0, "", "", ""),
+                CountryEntity(1, "", "", ""),
+                CountryEntity(2, "", "", ""),
+                CountryEntity(3, "", "", ""),
+                CountryEntity(4, "", "", "")
+            )
+        )
+        assertEquals(5, countriesDao.getCount())
     }
 }

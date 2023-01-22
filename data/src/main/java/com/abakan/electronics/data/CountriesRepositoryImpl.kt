@@ -18,16 +18,21 @@ internal class CountriesRepositoryImpl @Inject constructor(
             .getCountries()
             .map { it.map(CountryEntity::asExternal) }
 
-    override suspend fun sync() {
-        val remoteCountries = remoteSource.getCountries()
-        countriesDao.insertAll(remoteCountries.mapIndexed { index, remoteCountry ->
-            remoteCountry.toEntity(
-                index
-            )
-        })
-    }
-
-    override suspend fun insertFallbackData() {
-        countriesDao.insertAll(FALLBACK_DATA)
+    override suspend fun sync(): Boolean {
+        var networkCallIsSuccessful = true
+        val countriesToInsert = try {
+            remoteSource.getCountries().mapIndexed { index, remoteCountry ->
+                remoteCountry.toEntity(
+                    index
+                )
+            }
+        } catch (t: Throwable) {
+            networkCallIsSuccessful = false
+            FALLBACK_DATA
+        }
+        if (networkCallIsSuccessful || countriesDao.getCount() == 0L) {
+            countriesDao.insertAll(countriesToInsert)
+        }
+        return networkCallIsSuccessful
     }
 }

@@ -12,4 +12,6 @@ internal interface CountriesDao {
     fun getCountries(): Flow<List<CountryEntity>>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(countries: List<CountryEntity>)
+    @Query("SELECT COUNT(*) FROM countries")
+    suspend fun getCount(): Long
 }

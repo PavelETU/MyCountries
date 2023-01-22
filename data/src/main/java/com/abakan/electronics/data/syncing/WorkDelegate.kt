@@ -5,11 +5,8 @@ import com.abakan.electronics.data.CountriesRepository
 
 class WorkDelegate(private val repository: CountriesRepository) {
     suspend fun doWork(): ListenableWorker.Result =
-        try {
-            repository.sync()
+        if (repository.sync())
             ListenableWorker.Result.success()
-        } catch (t: Throwable) {
-            repository.insertFallbackData()
+        else
             ListenableWorker.Result.retry()
-        }
 }

@@ -3,4 +3,10 @@
     <string name="country">Country: %1$s</string>
     <string name="capital">Capital: %1$s</string>
     <string name="coat_of_arms_description">Coat of Arms of %1$s</string>
+    <string name="search">Search</string>
+    <string name="cancel">Cancel</string>
+    <string name="search_country">Search country</string>
+    <string name="search_term">Search term</string>
+    <string name="no_results">No country with such a name was found.\nPlease change the search term</string>
+    <string name="change_term">Change the search term</string>
 </resources>

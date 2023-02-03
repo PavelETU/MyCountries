@@ -20,6 +20,7 @@ import com.abakan.electronics.data.Country as CountryFromDataModule
 class CountriesListViewModelShould {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
+
     @RelaxedMockK
     private lateinit var repository: CountriesRepository
 
@@ -75,6 +76,113 @@ class CountriesListViewModelShould {
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
         assertTrue(viewModel.uiState.value is CountriesListUIState.Loading)
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `display searchDialog on search button click`() = runTest {
+        val viewModel = CountriesListViewModel(repository)
+        val collectJob =
+            launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
+
+        viewModel.onSearchClick()
+
+        assertTrue(viewModel.displaySearchDialog.value)
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `hide searchDialog on cancel button click`() = runTest {
+        val viewModel = CountriesListViewModel(repository)
+        val collectJob =
+            launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
+
+        viewModel.onSearchClick()
+        viewModel.onSearchCancel()
+
+        assertFalse(viewModel.displaySearchDialog.value)
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `perform search`() = runTest {
+        val countriesFromRepository = listOf(
+            CountryFromDataModule(
+                "Spain",
+                "Madrid",
+                "https://mainfacts.com/media/images/coats_of_arms/es.png"
+            ),
+            CountryFromDataModule(
+                "UK",
+                "London",
+                "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+            ),
+            CountryFromDataModule(
+                "US",
+                "Washington D.C.",
+                "https://mainfacts.com/media/images/coats_of_arms/us.png"
+            )
+        )
+        every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+
+        val viewModel = CountriesListViewModel(repository)
+        val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+        viewModel.onSearchPerform("sp")
+
+        val result = (viewModel.uiState.value as CountriesListUIState.Success).countries
+        assertEquals(1, result.size)
+        assertEquals("Spain", result[0].name.name)
+        assertEquals("Madrid", result[0].capital.capital)
+        assertEquals("https://mainfacts.com/media/images/coats_of_arms/es.png", result[0].coatOfArmsImage.url)
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `close search dialog onSearchPerform`() = runTest {
+        val countriesFromRepository = listOf(
+            CountryFromDataModule(
+                "Spain",
+                "Madrid",
+                "https://mainfacts.com/media/images/coats_of_arms/es.png"
+            )
+        )
+        every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+
+        val viewModel = CountriesListViewModel(repository)
+        val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
+        viewModel.onSearchClick()
+        viewModel.onSearchPerform("sp")
+
+        assertFalse(viewModel.displaySearchDialog.value)
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `display no results screen given search returned no results`() = runTest {
+        val countriesFromRepository = listOf(
+            CountryFromDataModule(
+                "Spain",
+                "Madrid",
+                "https://mainfacts.com/media/images/coats_of_arms/es.png"
+            ),
+            CountryFromDataModule(
+                "UK",
+                "London",
+                "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+            ),
+            CountryFromDataModule(
+                "US",
+                "Washington D.C.",
+                "https://mainfacts.com/media/images/coats_of_arms/us.png"
+            )
+        )
+        every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+
+        val viewModel = CountriesListViewModel(repository)
+        val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+        viewModel.onSearchPerform("noResults")
+
+        assertEquals(CountriesListUIState.NoSearchResults, viewModel.uiState.value)
         collectJob.cancel()
     }
 }

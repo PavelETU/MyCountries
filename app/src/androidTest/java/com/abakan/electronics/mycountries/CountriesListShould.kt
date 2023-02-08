@@ -158,7 +158,7 @@ class CountriesListShould {
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_term))
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search))
+            .onNode(hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag("inDialog"))
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.cancel))
@@ -185,7 +185,7 @@ class CountriesListShould {
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_term))
             .performTextInput("United")
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search))
+            .onNode(hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag("inDialog"))
             .performClick()
 
         assertTrue(searchPerformed)

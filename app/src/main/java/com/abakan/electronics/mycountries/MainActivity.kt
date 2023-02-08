@@ -4,19 +4,18 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -40,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.abakan.electronics.mycountries.ui.theme.MyCountriesTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.drop
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -105,7 +105,7 @@ private fun LoadingState() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 private fun CountryList(
     state: CountriesListUIState.Success,
@@ -114,11 +114,29 @@ private fun CountryList(
     onSearchAction: (String) -> Unit,
     onSearchClose: () -> Unit
 ) {
-    Scaffold(Modifier.fillMaxSize(), floatingActionButton = { SearchButton(onSearchClick) }) {
+    val verticalScroll = rememberLazyListState()
+    var fabExtended by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(verticalScroll) {
+        var prevScroll = 0
+        var prevFirstVisibleItem = 0
+        snapshotFlow {
+            verticalScroll.firstVisibleItemScrollOffset
+        }.drop(1).collect {
+            if (prevFirstVisibleItem == verticalScroll.firstVisibleItemIndex) fabExtended =
+                it < prevScroll
+            prevScroll = it
+            prevFirstVisibleItem = verticalScroll.firstVisibleItemIndex
+        }
+    }
+    Scaffold(
+        Modifier.fillMaxSize(),
+        floatingActionButton = { SearchButton(onSearchClick, fabExtended) }) {
         if (displaySearchDialog) {
             SearchDialog(onSearchAction, onSearchClose)
         }
-        LazyColumn(contentPadding = it) {
+        LazyColumn(
+            contentPadding = it, state = verticalScroll
+        ) {
             items(state.countries) { country ->
                 country.ToComposable()
             }
@@ -127,9 +145,26 @@ private fun CountryList(
 }
 
 @Composable
-private fun SearchButton(onSearchClick: () -> Unit) {
-    FilledIconButton(onClick = onSearchClick) {
-        Icon(Icons.Outlined.Search, contentDescription = stringResource(id = R.string.search))
+private fun SearchButton(onSearchClick: () -> Unit, fabExtended: Boolean) {
+    FloatingActionButton(
+        modifier = Modifier.padding(0.dp),
+        onClick = onSearchClick
+    ) {
+        Row(
+            Modifier.padding(start = 16.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Outlined.Search,
+                contentDescription = stringResource(id = R.string.search)
+            )
+            AnimatedVisibility(visible = fabExtended) {
+                Text(
+                    modifier = Modifier.padding(start = 5.dp),
+                    text = stringResource(id = R.string.search)
+                )
+            }
+        }
     }
 }
 
@@ -247,7 +282,7 @@ private fun SearchDialog(
             }
         )
     }, confirmButton = {
-        Button(onClick = { onSearchAction(searchTerm) }) {
+        Button(modifier = Modifier.testTag("inDialog"), onClick = { onSearchAction(searchTerm) }) {
             Text(text = stringResource(id = R.string.search))
         }
     }, dismissButton = {

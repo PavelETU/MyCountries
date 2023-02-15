@@ -4,6 +4,8 @@ import com.abakan.electronics.data.CountriesRepository
 import com.abakan.electronics.data.CountriesRepositoryImpl
 import com.abakan.electronics.data.remote.CountriesRemoteDataSource
 import com.abakan.electronics.data.remote.KtorClient
+import com.abakan.electronics.data.syncing.SyncingMonitor
+import com.abakan.electronics.data.syncing.WorkManagerSyncingMonitor
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,4 +20,7 @@ internal interface DataModule {
 
     @Binds
     fun bindRemote(ktorClient: KtorClient): CountriesRemoteDataSource
+
+    @Binds
+    fun bindSyncingMonitor(syncMonitor: WorkManagerSyncingMonitor): SyncingMonitor
 }

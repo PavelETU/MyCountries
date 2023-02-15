@@ -7,11 +7,12 @@ import androidx.work.WorkManager
 import androidx.work.WorkManagerInitializer
 import com.abakan.electronics.data.syncing.InjectedWorker
 
+internal const val SYNC_WORK = "SyncWork"
 class SyncInitializer : Initializer<Unit> {
     override fun create(context: Context) {
         WorkManager.getInstance(context).apply {
             enqueueUniqueWork(
-                "SyncWork",
+                SYNC_WORK,
                 ExistingWorkPolicy.KEEP,
                 InjectedWorker.buildWorkRequest()
             )

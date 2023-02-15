@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.ktor.client.serialization)
     implementation(libs.work.manager)
     implementation(libs.androidx.startup)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

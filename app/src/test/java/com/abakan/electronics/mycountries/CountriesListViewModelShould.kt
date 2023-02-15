@@ -1,6 +1,7 @@
 package com.abakan.electronics.mycountries
 
 import com.abakan.electronics.data.CountriesRepository
+import com.abakan.electronics.data.syncing.SyncingMonitor
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -24,17 +25,20 @@ class CountriesListViewModelShould {
     @RelaxedMockK
     private lateinit var repository: CountriesRepository
 
+    @RelaxedMockK
+    private lateinit var syncingMonitor: SyncingMonitor
+
     @Before
     fun setUp() = MockKAnnotations.init(this)
 
     @Test
     fun `load data at first`() {
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         assertEquals(CountriesListUIState.Loading, viewModel.uiState.value)
     }
 
     @Test
-    fun `map countries from repository to UI layer`() = runTest {
+    fun `map countries from repository to UI layer given syncing is done`() = runTest {
         val countriesFromRepository = listOf(
             CountryFromDataModule(
                 "Spain",
@@ -53,8 +57,9 @@ class CountriesListViewModelShould {
             )
         )
         every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+        every { syncingMonitor.isSyncing } returns flow { emit(false) }
 
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
         assertTrue(viewModel.uiState.value is CountriesListUIState.Success)
@@ -69,10 +74,39 @@ class CountriesListViewModelShould {
     }
 
     @Test
+    fun `be in loading state given syncing is in progress`() = runTest {
+        val countriesFromRepository = listOf(
+            CountryFromDataModule(
+                "Spain",
+                "Madrid",
+                "https://mainfacts.com/media/images/coats_of_arms/es.png"
+            ),
+            CountryFromDataModule(
+                "UK",
+                "London",
+                "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+            ),
+            CountryFromDataModule(
+                "US",
+                "Washington D.C.",
+                "https://mainfacts.com/media/images/coats_of_arms/us.png"
+            )
+        )
+        every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+        every { syncingMonitor.isSyncing } returns flow { emit(true) }
+
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
+        val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+
+        assertTrue(viewModel.uiState.value is CountriesListUIState.Loading)
+        collectJob.cancel()
+    }
+
+    @Test
     fun `map empty list to loading state`() = runTest {
         every { repository.getCountries() } returns flow { emit(emptyList()) }
 
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
         assertTrue(viewModel.uiState.value is CountriesListUIState.Loading)
@@ -81,7 +115,7 @@ class CountriesListViewModelShould {
 
     @Test
     fun `display searchDialog on search button click`() = runTest {
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob =
             launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
 
@@ -93,7 +127,7 @@ class CountriesListViewModelShould {
 
     @Test
     fun `hide searchDialog on cancel button click`() = runTest {
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob =
             launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
 
@@ -124,8 +158,9 @@ class CountriesListViewModelShould {
             )
         )
         every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+        every { syncingMonitor.isSyncing } returns flow { emit(false) }
 
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
         viewModel.onSearchPerform("sp")
 
@@ -148,7 +183,7 @@ class CountriesListViewModelShould {
         )
         every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
 
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
         viewModel.onSearchClick()
         viewModel.onSearchPerform("sp")
@@ -177,8 +212,9 @@ class CountriesListViewModelShould {
             )
         )
         every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+        every { syncingMonitor.isSyncing } returns flow { emit(false) }
 
-        val viewModel = CountriesListViewModel(repository)
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
         viewModel.onSearchPerform("noResults")
 

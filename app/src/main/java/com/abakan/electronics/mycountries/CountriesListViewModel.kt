@@ -3,13 +3,17 @@ package com.abakan.electronics.mycountries
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abakan.electronics.data.CountriesRepository
+import com.abakan.electronics.data.syncing.SyncingMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import com.abakan.electronics.data.Country as DataCountry
 
 @HiltViewModel
-class CountriesListViewModel @Inject constructor(repository: CountriesRepository) : ViewModel() {
+class CountriesListViewModel @Inject constructor(
+    repository: CountriesRepository,
+    syncingMonitor: SyncingMonitor
+) : ViewModel() {
     private val _displaySearchDialog = MutableStateFlow(false)
     val displaySearchDialog: StateFlow<Boolean> = _displaySearchDialog
     private val searchTerm = MutableStateFlow("")
@@ -17,6 +21,10 @@ class CountriesListViewModel @Inject constructor(repository: CountriesRepository
         repository
             .getCountries()
             .map { it.toUIState() }
+            .combine(syncingMonitor.isSyncing) { state: CountriesListUIState, syncing: Boolean ->
+                if (syncing) CountriesListUIState.Loading
+                else state
+            }
             .combine(searchTerm) { state: CountriesListUIState, searchTerm: String ->
                 if (state is CountriesListUIState.Success && searchTerm.isNotEmpty()) {
                     val filteredCountries = state.countries.filter {

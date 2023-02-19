@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,13 +21,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -60,7 +64,7 @@ class MainActivity : ComponentActivity() {
                         state,
                         displaySearch,
                         onSearchClick = { viewModel.onSearchClick() },
-                        onSearchAction = { viewModel.onSearchPerform(it) },
+                        onSearchAction = { term, type -> viewModel.onSearchPerform(term, type) },
                         onSearchClose = { viewModel.onSearchCancel() })
                 }
             }
@@ -73,7 +77,7 @@ fun CountriesListScreen(
     state: CountriesListUIState,
     displaySearchDialog: Boolean,
     onSearchClick: () -> Unit,
-    onSearchAction: (String) -> Unit,
+    onSearchAction: (String, Boolean) -> Unit,
     onSearchClose: () -> Unit
 ) {
     when (state) {
@@ -111,7 +115,7 @@ private fun CountryList(
     state: CountriesListUIState.Success,
     displaySearchDialog: Boolean,
     onSearchClick: () -> Unit,
-    onSearchAction: (String) -> Unit,
+    onSearchAction: (String, Boolean) -> Unit,
     onSearchClose: () -> Unit
 ) {
     val verticalScroll = rememberLazyListState()
@@ -216,7 +220,7 @@ private fun returnDummyPainterForPreviewOrNull() =
 private fun NoResultsState(
     displaySearchDialog: Boolean,
     onSearchClick: () -> Unit,
-    onSearchAction: (String) -> Unit,
+    onSearchAction: (String, Boolean) -> Unit,
     onSearchClose: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
@@ -247,42 +251,127 @@ private fun NoResultsState(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalTextApi::class)
 @Composable
 private fun SearchDialog(
-    onSearchAction: (String) -> Unit,
+    onSearchAction: (String, Boolean) -> Unit,
     onSearchClose: () -> Unit
 ) {
     var searchTerm by rememberSaveable { mutableStateOf("") }
+    var searchByName by rememberSaveable { mutableStateOf(true) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     AlertDialog(onDismissRequest = onSearchClose, title = {
         Text(text = stringResource(id = R.string.search_country))
     }, text = {
-        OutlinedTextField(
-            value = searchTerm, onValueChange = { searchTerm = it },
-            modifier = Modifier.padding(5.dp),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(onSearch = {
-                keyboardController?.hide()
-                focusManager.clearFocus()
-                onSearchAction(searchTerm)
-            }),
-            label = {
-                Text(
-                    text = stringResource(id = R.string.search_term),
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+        Column {
+            OutlinedTextField(
+                value = searchTerm, onValueChange = { searchTerm = it },
+                modifier = Modifier.padding(5.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(onSearch = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    onSearchAction(searchTerm, searchByName)
+                }),
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.search_term),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            )
+            val primaryColor = MaterialTheme.colorScheme.primary
+            val rememberTextMeasurer = rememberTextMeasurer()
+            val measuredText =
+                rememberTextMeasurer.measure(AnnotatedString(stringResource(id = R.string.search_by)))
+            val middleOfText = measuredText.size.height / 2f
+            Column(
+                Modifier
+                    .align(Alignment.End)
+                    .padding(top = 10.dp, end = 5.dp)
+                    .selectableGroup()
+                    .drawBehind {
+                        val twentiethOfWidth = size.width / 20f
+                        drawText(measuredText, topLeft = Offset(twentiethOfWidth, 0F))
+                        drawLine(
+                            color = primaryColor,
+                            Offset(0f, middleOfText),
+                            Offset(0f, size.height)
+                        )
+                        drawLine(
+                            color = primaryColor,
+                            Offset(0f, size.height),
+                            Offset(size.width, size.height)
+                        )
+                        drawLine(
+                            color = primaryColor,
+                            Offset(size.width, size.height),
+                            Offset(size.width, middleOfText)
+                        )
+                        drawLine(
+                            color = primaryColor,
+                            Offset(size.width, middleOfText),
+                            Offset(twentiethOfWidth + measuredText.size.width + 8f, middleOfText)
+                        )
+                        drawLine(
+                            color = primaryColor,
+                            Offset(0f, middleOfText),
+                            Offset(twentiethOfWidth - 8f, middleOfText)
+                        )
+                    }
+            ) {
+                Spacer(modifier = Modifier.height(5.dp))
+                Row {
+                    Row(
+                        Modifier
+                            .height(60.dp)
+                            .padding(start = 10.dp, top = 5.dp, end = 10.dp)
+                            .selectable(
+                                selected = searchByName,
+                                onClick = { searchByName = true },
+                                role = Role.RadioButton
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = searchByName, onClick = null)
+                        Text(
+                            text = stringResource(id = R.string.by_name),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 5.dp)
+                        )
+                    }
+                    Row(
+                        Modifier
+                            .height(60.dp)
+                            .padding(top = 5.dp, end = 10.dp)
+                            .selectable(
+                                selected = searchByName,
+                                onClick = { searchByName = false },
+                                role = Role.RadioButton
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = !searchByName, onClick = null)
+                        Text(
+                            text = stringResource(id = R.string.by_capital),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 5.dp)
+                        )
+                    }
+                }
             }
-        )
+        }
     }, confirmButton = {
-        Button(modifier = Modifier.testTag("inDialog"), onClick = { onSearchAction(searchTerm) }) {
+        Button(
+            modifier = Modifier.testTag("inDialog"),
+            onClick = { onSearchAction(searchTerm, searchByName) }) {
             Text(text = stringResource(id = R.string.search))
         }
     }, dismissButton = {
@@ -296,7 +385,7 @@ private fun SearchDialog(
 @Composable
 fun LoadingPreview() {
     MyCountriesTheme {
-        CountriesListScreen(CountriesListUIState.Loading, false, {}, {}, {})
+        CountriesListScreen(CountriesListUIState.Loading, false, {}, { _, _ -> }, {})
     }
 }
 
@@ -319,7 +408,7 @@ fun OneCountryPreview() {
             {
                 Toast.makeText(context, "Search button clicked", Toast.LENGTH_SHORT).show()
             },
-            {}, {}
+            { _, _ -> }, {}
         )
     }
 }
@@ -353,7 +442,7 @@ fun ThreeCountriesPreview() {
             {
                 Toast.makeText(context, "Search button clicked", Toast.LENGTH_SHORT).show()
             },
-            {}, {}
+            { _, _ -> }, {}
         )
     }
 }
@@ -362,6 +451,14 @@ fun ThreeCountriesPreview() {
 @Composable
 fun NoSearchResultsPreview() {
     MyCountriesTheme {
-        CountriesListScreen(CountriesListUIState.NoSearchResults, false, {}, {}, {})
+        CountriesListScreen(CountriesListUIState.NoSearchResults, false, {}, { _, _ -> }, {})
+    }
+}
+
+@Preview(showBackground = true, heightDp = 500)
+@Composable
+fun SearchDialogPreview() {
+    MyCountriesTheme {
+        SearchDialog({ _, _ -> }, {})
     }
 }

@@ -34,7 +34,7 @@ class CountriesListShould {
     @Test
     fun displayLoadingIndicator_givenStateIsLoading() {
         composeTestRule.setContent {
-            CountriesListScreen(CountriesListUIState.Loading, false, {}, {}, {})
+            CountriesListScreen(CountriesListUIState.Loading, false, {}, { _, _ -> }, {})
         }
 
         composeTestRule
@@ -58,7 +58,7 @@ class CountriesListShould {
                     )
                 ),
                 false,
-                {}, {}, {},
+                {}, { _, _ -> }, {},
             )
         }
 
@@ -93,7 +93,7 @@ class CountriesListShould {
                 state = CountriesListUIState.Success(listOfCountries),
                 false,
                 {},
-                {},
+                { _, _ -> },
                 {})
         }
 
@@ -128,7 +128,7 @@ class CountriesListShould {
                 {
                     searchButtonClicked = true
                 },
-                {}, {}
+                { _, _ -> }, {}
             )
         }
 
@@ -147,36 +147,27 @@ class CountriesListShould {
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
                 {},
-                {}, {}
+                { _, _ -> }, {}
             )
         }
 
-        composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_country))
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_term))
-            .assertIsDisplayed()
-        composeTestRule
-            .onNode(hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag("inDialog"))
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.cancel))
-            .assertIsDisplayed()
+        assertSearchDialogIsDisplayed()
     }
 
     @Test
-    fun performSearchWithTheCorrectTerm_givenSearchInSearchDialogClicked() {
+    fun performSearchByNameWithTheCorrectTerm_givenSearchInSearchDialogClicked() {
         var searchPerformed = false
+        var searchByName = false
         var searchTerm = ""
         composeTestRule.setContent {
             CountriesListScreen(
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
                 onSearchClick = {},
-                {
+                { searchQuery, searchBy ->
                     searchPerformed = true
-                    searchTerm = it
+                    searchTerm = searchQuery
+                    searchByName = searchBy
                 }, {}
             )
         }
@@ -185,11 +176,53 @@ class CountriesListShould {
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_term))
             .performTextInput("United")
         composeTestRule
-            .onNode(hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag("inDialog"))
+            .onNode(
+                hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag(
+                    "inDialog"
+                )
+            )
             .performClick()
 
         assertTrue(searchPerformed)
+        assertTrue(searchByName)
         assertEquals("United", searchTerm)
+    }
+
+    @Test
+    fun performSearchByCapital_givenSearchByCapitalClicked() {
+        var searchPerformed = false
+        var searchByName = true
+        var searchTerm = ""
+        composeTestRule.setContent {
+            CountriesListScreen(
+                state = CountriesListUIState.Success(listOfCountries),
+                true,
+                onSearchClick = {},
+                { searchQuery, searchBy ->
+                    searchPerformed = true
+                    searchTerm = searchQuery
+                    searchByName = searchBy
+                }, {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_term))
+            .performTextInput("Lon")
+        composeTestRule
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.by_capital))
+            .performClick()
+        composeTestRule
+            .onNode(
+                hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag(
+                    "inDialog"
+                )
+            )
+            .performClick()
+
+        assertTrue(searchPerformed)
+        assertFalse(searchByName)
+        assertEquals("Lon", searchTerm)
     }
 
     @Test
@@ -199,7 +232,7 @@ class CountriesListShould {
             CountriesListScreen(
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
-                onSearchClick = {}, onSearchAction = {}) {
+                onSearchClick = {}, onSearchAction = { _, _ -> }) {
                 closeEventTriggered = true
             }
         }
@@ -214,7 +247,7 @@ class CountriesListShould {
     @Test
     fun displayNoResults_givenNoSearchResultsState() {
         composeTestRule.setContent {
-            CountriesListScreen(CountriesListUIState.NoSearchResults, false, {}, {}, {})
+            CountriesListScreen(CountriesListUIState.NoSearchResults, false, {}, { _, _ -> }, {})
         }
 
         composeTestRule
@@ -233,7 +266,7 @@ class CountriesListShould {
                 CountriesListUIState.NoSearchResults,
                 false,
                 { onSearchClick = true },
-                {},
+                { _, _ -> },
                 {})
         }
 
@@ -250,10 +283,14 @@ class CountriesListShould {
             CountriesListScreen(
                 state = CountriesListUIState.NoSearchResults,
                 true,
-                {}, {}, {}
+                {}, { _, _ -> }, {}
             )
         }
 
+        assertSearchDialogIsDisplayed()
+    }
+
+    private fun assertSearchDialogIsDisplayed() {
         composeTestRule
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_country))
             .assertIsDisplayed()
@@ -261,7 +298,17 @@ class CountriesListShould {
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search_term))
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.search))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.by_name))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.by_capital))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNode(
+                hasText(composeTestRule.activity.resources.getString(R.string.search)) and hasTestTag(
+                    "inDialog"
+                )
+            )
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithText(composeTestRule.activity.resources.getString(R.string.cancel))

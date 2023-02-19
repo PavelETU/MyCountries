@@ -17,6 +17,7 @@ class CountriesListViewModel @Inject constructor(
     private val _displaySearchDialog = MutableStateFlow(false)
     val displaySearchDialog: StateFlow<Boolean> = _displaySearchDialog
     private val searchTerm = MutableStateFlow("")
+    private var searchByName = true
     val uiState: StateFlow<CountriesListUIState> =
         repository
             .getCountries()
@@ -28,10 +29,16 @@ class CountriesListViewModel @Inject constructor(
             .combine(searchTerm) { state: CountriesListUIState, searchTerm: String ->
                 if (state is CountriesListUIState.Success && searchTerm.isNotEmpty()) {
                     val filteredCountries = state.countries.filter {
-                        it.name.name.contains(
-                            searchTerm,
-                            true
-                        )
+                        if (searchByName)
+                            it.name.name.contains(
+                                searchTerm,
+                                true
+                            )
+                        else
+                            it.capital.capital.contains(
+                                searchTerm,
+                                true
+                            )
                     }
                     return@combine if (filteredCountries.isNotEmpty()) CountriesListUIState.Success(
                         filteredCountries
@@ -63,7 +70,8 @@ class CountriesListViewModel @Inject constructor(
         _displaySearchDialog.tryEmit(false)
     }
 
-    fun onSearchPerform(term: String) {
+    fun onSearchPerform(term: String, searchByName: Boolean) {
+        this.searchByName = searchByName
         _displaySearchDialog.tryEmit(false)
         searchTerm.tryEmit(term)
     }

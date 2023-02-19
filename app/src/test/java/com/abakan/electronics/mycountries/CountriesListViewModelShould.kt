@@ -139,7 +139,7 @@ class CountriesListViewModelShould {
     }
 
     @Test
-    fun `perform search`() = runTest {
+    fun `perform search by name`() = runTest {
         val countriesFromRepository = listOf(
             CountryFromDataModule(
                 "Spain",
@@ -162,13 +162,47 @@ class CountriesListViewModelShould {
 
         val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
-        viewModel.onSearchPerform("sp")
+        viewModel.onSearchPerform("sp", true)
 
         val result = (viewModel.uiState.value as CountriesListUIState.Success).countries
         assertEquals(1, result.size)
         assertEquals("Spain", result[0].name.name)
         assertEquals("Madrid", result[0].capital.capital)
         assertEquals("https://mainfacts.com/media/images/coats_of_arms/es.png", result[0].coatOfArmsImage.url)
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `perform search by capital`() = runTest {
+        val countriesFromRepository = listOf(
+            CountryFromDataModule(
+                "Spain",
+                "Madrid",
+                "https://mainfacts.com/media/images/coats_of_arms/es.png"
+            ),
+            CountryFromDataModule(
+                "UK",
+                "London",
+                "https://mainfacts.com/media/images/coats_of_arms/gb.png"
+            ),
+            CountryFromDataModule(
+                "US",
+                "Washington D.C.",
+                "https://mainfacts.com/media/images/coats_of_arms/us.png"
+            )
+        )
+        every { repository.getCountries() } returns flow { emit(countriesFromRepository) }
+        every { syncingMonitor.isSyncing } returns flow { emit(false) }
+
+        val viewModel = CountriesListViewModel(repository, syncingMonitor)
+        val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+        viewModel.onSearchPerform("lon", false)
+
+        val result = (viewModel.uiState.value as CountriesListUIState.Success).countries
+        assertEquals(1, result.size)
+        assertEquals("UK", result[0].name.name)
+        assertEquals("London", result[0].capital.capital)
+        assertEquals("https://mainfacts.com/media/images/coats_of_arms/gb.png", result[0].coatOfArmsImage.url)
         collectJob.cancel()
     }
 
@@ -186,7 +220,7 @@ class CountriesListViewModelShould {
         val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.displaySearchDialog.collect() }
         viewModel.onSearchClick()
-        viewModel.onSearchPerform("sp")
+        viewModel.onSearchPerform("sp", true)
 
         assertFalse(viewModel.displaySearchDialog.value)
         collectJob.cancel()
@@ -216,7 +250,7 @@ class CountriesListViewModelShould {
 
         val viewModel = CountriesListViewModel(repository, syncingMonitor)
         val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
-        viewModel.onSearchPerform("noResults")
+        viewModel.onSearchPerform("noResults", true)
 
         assertEquals(CountriesListUIState.NoSearchResults, viewModel.uiState.value)
         collectJob.cancel()

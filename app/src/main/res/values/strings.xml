@@ -9,4 +9,7 @@
     <string name="search_term">Search term</string>
     <string name="no_results">No country with such a name was found.\nPlease change the search term</string>
     <string name="change_term">Change the search term</string>
+    <string name="search_by">Search by</string>
+    <string name="by_name">name</string>
+    <string name="by_capital">capital</string>
 </resources>

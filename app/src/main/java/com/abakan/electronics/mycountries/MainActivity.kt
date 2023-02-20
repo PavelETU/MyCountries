@@ -6,9 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
@@ -118,7 +119,7 @@ private fun CountryList(
     onSearchAction: (String, Boolean) -> Unit,
     onSearchClose: () -> Unit
 ) {
-    val verticalScroll = rememberLazyListState()
+    val verticalScroll = rememberLazyGridState()
     var fabExtended by rememberSaveable { mutableStateOf(true) }
     LaunchedEffect(verticalScroll) {
         var prevScroll = 0
@@ -138,10 +139,10 @@ private fun CountryList(
         if (displaySearchDialog) {
             SearchDialog(onSearchAction, onSearchClose)
         }
-        LazyColumn(
-            contentPadding = it, state = verticalScroll
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(300.dp), contentPadding = it, state = verticalScroll
         ) {
-            items(state.countries) { country ->
+            items(items = state.countries) { country ->
                 country.ToComposable()
             }
         }

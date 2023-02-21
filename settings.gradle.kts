@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 rootProject.name = "My Countries"
 include(":app")
 include(":data")
+include(":feature:countries")
+include(":ui")

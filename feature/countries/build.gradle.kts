@@ -1,21 +1,18 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
     alias(libs.plugins.dagger.hilt)
 }
 
 android {
-    namespace = "com.abakan.electronics.mycountries"
+    namespace = "com.abakan.electronics.mycountries.feature.list"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.abakan.electronics.mycountries"
         minSdk = 22
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -51,7 +48,6 @@ android {
 
 dependencies {
     implementation(project(":ui"))
-    implementation(project(":feature:countries"))
     implementation(project(":data"))
 
     implementation(libs.androidx.core.ktx)

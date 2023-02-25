@@ -17,7 +17,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.abakan.electronics.mycountries.testing.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":ui"))
     implementation(project(":feature:countries"))
     implementation(project(":data"))
+    implementation(project(":testing"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -60,6 +61,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.preview)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.navigation)
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -74,6 +76,8 @@ dependencies {
     testImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.compose.ui.test)
+    androidTestImplementation(libs.hilt.testing)
+    kaptAndroidTest(libs.dagger.hilt.android.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

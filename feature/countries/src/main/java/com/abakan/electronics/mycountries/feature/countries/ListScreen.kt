@@ -36,16 +36,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.abakan.electronics.mycountries.feature.list.R
 import com.abakan.electronics.mycountries.ui.MyCountriesTheme
 import kotlinx.coroutines.flow.drop
 
 @Composable
-fun ListScreen() {
-    val viewModel: CountriesListViewModel = viewModel()
+internal fun CountriesListRoute(viewModel: CountriesListViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val displaySearch by viewModel.displaySearchDialog.collectAsStateWithLifecycle()
     CountriesListScreen(

@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.work.manager)
     implementation(libs.androidx.startup)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.hilt.testing)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

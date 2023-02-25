@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import com.abakan.electronics.mycountries.feature.countries.ListScreen
 import com.abakan.electronics.mycountries.ui.MyCountriesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,12 +18,11 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             MyCountriesTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ListScreen()
+                    MainNavigation()
                 }
             }
         }

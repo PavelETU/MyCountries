@@ -1,5 +1,5 @@
 [versions]
-androidPlugin = "7.4.1"
+androidPlugin = "7.4.2"
 kotlinPlugin = "1.7.20"
 composeCompiler = "1.3.2"
 composeLibraries = "1.3.3"

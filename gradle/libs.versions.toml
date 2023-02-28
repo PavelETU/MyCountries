@@ -20,7 +20,7 @@ coroutines = "1.6.4"
 ksp = "1.7.20-1.0.8"
 room = "2.5.0"
 junitRunner = "1.5.2"
-ktor = "2.2.3"
+ktor = "2.2.4"
 workManager = "2.7.1"
 startup = "1.1.1"
 

@@ -1,6 +1,6 @@
 [versions]
 androidPlugin = "7.4.2"
-kotlinPlugin = "1.7.20"
+kotlinPlugin = "1.8.10"
 composeCompiler = "1.3.2"
 composeLibraries = "1.3.3"
 composeNavigation = "2.5.3"

@@ -6,6 +6,6 @@ import com.abakan.electronics.mycountries.feature.countries.CountriesListRoute
 
 const val COUNTRIES_ROUTE = "countries"
 
-fun NavGraphBuilder.countriesScreen() {
-    composable(COUNTRIES_ROUTE) { CountriesListRoute() }
+fun NavGraphBuilder.countriesScreen(onNavigateToCountry: (String) -> Unit) {
+    composable(COUNTRIES_ROUTE) { CountriesListRoute(onNavigateToCountry) }
 }

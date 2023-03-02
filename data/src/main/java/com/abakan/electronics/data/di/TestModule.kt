@@ -42,5 +42,5 @@ internal class FakeRemoteDataSource @Inject constructor() : CountriesRemoteDataS
 
 internal class FakeSyncMonitor @Inject constructor() : SyncingMonitor {
     override val isSyncing: Flow<Boolean>
-        get() = flow { emit(true) }
+        get() = flow { emit(false) }
 }

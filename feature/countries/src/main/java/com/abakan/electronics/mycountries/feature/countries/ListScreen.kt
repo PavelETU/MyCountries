@@ -44,10 +44,14 @@ import com.abakan.electronics.mycountries.ui.MyCountriesTheme
 import kotlinx.coroutines.flow.drop
 
 @Composable
-internal fun CountriesListRoute(viewModel: CountriesListViewModel = hiltViewModel()) {
+internal fun CountriesListRoute(
+    onNavigateToCountry: (String) -> Unit,
+    viewModel: CountriesListViewModel = hiltViewModel()
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val displaySearch by viewModel.displaySearchDialog.collectAsStateWithLifecycle()
     CountriesListScreen(
+        onNavigateToCountry,
         state,
         displaySearch,
         onSearchClick = { viewModel.onSearchClick() },
@@ -57,6 +61,7 @@ internal fun CountriesListRoute(viewModel: CountriesListViewModel = hiltViewMode
 
 @Composable
 fun CountriesListScreen(
+    onNavigateToCountry: (String) -> Unit,
     state: CountriesListUIState,
     displaySearchDialog: Boolean,
     onSearchClick: () -> Unit,
@@ -66,6 +71,7 @@ fun CountriesListScreen(
     when (state) {
         is CountriesListUIState.Loading -> LoadingState()
         is CountriesListUIState.Success -> CountryList(
+            onNavigateToCountry,
             state,
             displaySearchDialog,
             onSearchClick,
@@ -95,6 +101,7 @@ private fun LoadingState() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 private fun CountryList(
+    onNavigateToCountry: (String) -> Unit,
     state: CountriesListUIState.Success,
     displaySearchDialog: Boolean,
     onSearchClick: () -> Unit,
@@ -125,7 +132,7 @@ private fun CountryList(
             columns = GridCells.Adaptive(300.dp), contentPadding = it, state = verticalScroll
         ) {
             items(items = state.countries) { country ->
-                country.ToComposable()
+                country.ToComposable(onNavigateToCountry)
             }
         }
     }
@@ -155,12 +162,14 @@ private fun SearchButton(onSearchClick: () -> Unit, fabExtended: Boolean) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Country.ToComposable() {
+private fun Country.ToComposable(onNavigateToCountry: (String) -> Unit) {
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp)
+            .padding(5.dp),
+        onClick = { onNavigateToCountry(name.name) }
     ) {
         AsyncImage(
             model = coatOfArmsImage.url,
@@ -368,7 +377,7 @@ private fun SearchDialog(
 @Composable
 fun LoadingPreview() {
     MyCountriesTheme {
-        CountriesListScreen(CountriesListUIState.Loading, false, {}, { _, _ -> }, {})
+        CountriesListScreen({}, CountriesListUIState.Loading, false, {}, { _, _ -> }, {})
     }
 }
 
@@ -377,7 +386,7 @@ fun LoadingPreview() {
 fun OneCountryPreview() {
     MyCountriesTheme {
         val context = LocalContext.current
-        CountriesListScreen(
+        CountriesListScreen({},
             CountriesListUIState.Success(
                 listOf(
                     Country(
@@ -401,7 +410,7 @@ fun OneCountryPreview() {
 fun ThreeCountriesPreview() {
     MyCountriesTheme {
         val context = LocalContext.current
-        CountriesListScreen(
+        CountriesListScreen({},
             CountriesListUIState.Success(
                 listOf(
                     Country(
@@ -434,7 +443,7 @@ fun ThreeCountriesPreview() {
 @Composable
 fun NoSearchResultsPreview() {
     MyCountriesTheme {
-        CountriesListScreen(CountriesListUIState.NoSearchResults, false, {}, { _, _ -> }, {})
+        CountriesListScreen({}, CountriesListUIState.NoSearchResults, false, {}, { _, _ -> }, {})
     }
 }
 

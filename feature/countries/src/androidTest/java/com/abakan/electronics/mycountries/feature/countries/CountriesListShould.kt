@@ -35,7 +35,7 @@ class CountriesListShould {
     @Test
     fun displayLoadingIndicator_givenStateIsLoading() {
         composeTestRule.setContent {
-            CountriesListScreen(CountriesListUIState.Loading, false, {}, { _, _ -> }, {})
+            CountriesListScreen({}, CountriesListUIState.Loading, false, {}, { _, _ -> }, {})
         }
 
         composeTestRule
@@ -49,6 +49,7 @@ class CountriesListShould {
         val capital = "Madrid"
         composeTestRule.setContent {
             CountriesListScreen(
+                {},
                 state = CountriesListUIState.Success(
                     listOf(
                         Country(
@@ -90,7 +91,7 @@ class CountriesListShould {
     @Test
     fun displayThreeCountries_givenThreeCountriesLoaded() {
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.Success(listOfCountries),
                 false,
                 {},
@@ -124,7 +125,7 @@ class CountriesListShould {
     fun displayClickableSearchButton_givenCountriesAreLoaded() {
         var searchButtonClicked = false
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.Success(listOfCountries), false,
                 {
                     searchButtonClicked = true
@@ -144,7 +145,7 @@ class CountriesListShould {
     @Test
     fun displaySearchDialog_givenDisplayDialogParameterIsTrue() {
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
                 {},
@@ -161,7 +162,7 @@ class CountriesListShould {
         var searchByName = false
         var searchTerm = ""
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
                 onSearchClick = {},
@@ -195,7 +196,7 @@ class CountriesListShould {
         var searchByName = true
         var searchTerm = ""
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
                 onSearchClick = {},
@@ -230,7 +231,7 @@ class CountriesListShould {
     fun closeSearchDialog_givenCancelClicked() {
         var closeEventTriggered = false
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.Success(listOfCountries),
                 true,
                 onSearchClick = {}, onSearchAction = { _, _ -> }) {
@@ -248,7 +249,13 @@ class CountriesListShould {
     @Test
     fun displayNoResults_givenNoSearchResultsState() {
         composeTestRule.setContent {
-            CountriesListScreen(CountriesListUIState.NoSearchResults, false, {}, { _, _ -> }, {})
+            CountriesListScreen(
+                {},
+                CountriesListUIState.NoSearchResults,
+                false,
+                {},
+                { _, _ -> },
+                {})
         }
 
         composeTestRule
@@ -263,7 +270,7 @@ class CountriesListShould {
     fun triggerOnSearchClickFromNoResultsScreen_givenChangeTermClicked() {
         var onSearchClick = false
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 CountriesListUIState.NoSearchResults,
                 false,
                 { onSearchClick = true },
@@ -281,7 +288,7 @@ class CountriesListShould {
     @Test
     fun displaySearchDialogFromNoResultsScreen_givenDisplayDialogParameterIsTrue() {
         composeTestRule.setContent {
-            CountriesListScreen(
+            CountriesListScreen({},
                 state = CountriesListUIState.NoSearchResults,
                 true,
                 {}, { _, _ -> }, {}
@@ -289,6 +296,24 @@ class CountriesListShould {
         }
 
         assertSearchDialogIsDisplayed()
+    }
+
+    @Test
+    fun triggerNavigationIntoDetails_givenCountryClicked() {
+        var countryToNavigateInto = ""
+        composeTestRule.setContent {
+            CountriesListScreen({ countryToNavigateInto = it },
+                state = CountriesListUIState.Success(listOfCountries),
+                false,
+                {}, { _, _ -> }, {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithText("Capital: ${listOfCountries[1].capital.capital}")
+            .performClick()
+
+        assertEquals(listOfCountries[1].name.name, countryToNavigateInto)
     }
 
     private fun assertSearchDialogIsDisplayed() {

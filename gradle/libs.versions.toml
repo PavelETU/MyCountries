@@ -21,7 +21,7 @@ ksp = "1.8.10-1.0.9"
 room = "2.5.0"
 junitRunner = "1.5.2"
 ktor = "2.2.4"
-workManager = "2.8.0"
+workManager = "2.9.1"
 startup = "1.1.1"
 
 [libraries]
